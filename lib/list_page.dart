@@ -16,7 +16,6 @@ class _ListPageState extends State<ListPage> {
 
   @override
   void didChangeDependencies() {
-    getPhotosInfo();
     images
         .forEach((image) => precacheImage(NetworkImage(image.image), context));
 
