@@ -12,12 +12,11 @@ class ListPage extends StatefulWidget {
 
 class _ListPageState extends State<ListPage> {
   final List photoDetailsList = [];
-  final List images = [];
 
   @override
   void didChangeDependencies() {
-    images
-        .forEach((image) => precacheImage(NetworkImage(image.image), context));
+    photoDetailsList.forEach((photo) =>
+        precacheImage(NetworkImage(photo['urls']['regular'].image), context));
 
     super.didChangeDependencies();
   }
@@ -42,11 +41,12 @@ class _ListPageState extends State<ListPage> {
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => PhotoPage(images[index]),
+                  builder: (context) =>
+                      PhotoPage(photoDetailsList[index]['urls']['regular']),
                 ),
               ),
               child: Hero(
-                tag: images[index],
+                tag: photoDetailsList[index]['urls']['regular'],
                 child: Card(
                   child: Column(
                     children: [
@@ -54,23 +54,20 @@ class _ListPageState extends State<ListPage> {
                         child: Container(
                           decoration: BoxDecoration(
                             image: DecorationImage(
-                              image: NetworkImage(images[index]),
+                              image: NetworkImage(
+                                  photoDetailsList[index]['urls']['regular']),
                               fit: BoxFit.cover,
                             ),
                           ),
                         ),
                       ),
                       ListTile(
-                        title: Text(
-                            photoDetailsList[index]['user']['username'] != null
-                                ? photoDetailsList[index]['user']['username']
-                                : 'User ${index + 1}'),
-                        subtitle: Text(photoDetailsList[index]['description'] !=
-                                null
-                            ? photoDetailsList[index]['description']
-                            : photoDetailsList[index]['alt_description'] != null
-                                ? photoDetailsList[index]['alt_description']
-                                : 'Description #${index + 1}'),
+                        title: Text(photoDetailsList[index]['user']
+                                ['username'] ??
+                            'User ${index + 1}'),
+                        subtitle: Text(photoDetailsList[index]['description'] ??
+                            (photoDetailsList[index]['alt_description'] ??
+                                'Description #${index + 1}')),
                       ),
                     ],
                   ),
@@ -96,10 +93,7 @@ class _ListPageState extends State<ListPage> {
 
     if (response.statusCode == 200 && photoDetailsList.isEmpty) {
       var jsonResponse = convert.jsonDecode(response.body);
-      for (dynamic item in jsonResponse) {
-        photoDetailsList.add(item);
-        images.add(item['urls']['regular']);
-      }
+      jsonResponse.forEach((item) => photoDetailsList.add(item));
     }
   }
 }
